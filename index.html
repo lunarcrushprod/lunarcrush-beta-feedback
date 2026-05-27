@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>LunarCrush Beta Feedback</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Instrument+Serif&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e1a;
+    --bg-elev: #111726;
+    --bg-input: #0d1320;
+    --border: #1f2940;
+    --border-bright: #2d3a5c;
+    --text: #e8ecf5;
+    --text-dim: #8892b0;
+    --accent: #7dd3fc;
+    --accent-warm: #fbbf24;
+    --accent-glow: rgba(125, 211, 252, 0.15);
+    --danger: #f87171;
+    --success: #4ade80;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'IBM Plex Sans', sans-serif;
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+  body {
+    background:
+      radial-gradient(ellipse 80% 50% at 50% -20%, rgba(125, 211, 252, 0.08), transparent),
+      radial-gradient(ellipse 60% 40% at 100% 100%, rgba(251, 191, 36, 0.04), transparent),
+      var(--bg);
+    padding: 48px 24px 96px;
+  }
+  .container { max-width: 720px; margin: 0 auto; }
+  header { margin-bottom: 48px; }
+  .eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .eyebrow::before {
+    content: '';
+    width: 6px; height: 6px;
+    background: var(--accent);
+    border-radius: 50%;
+    box-shadow: 0 0 12px var(--accent);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+  h1 {
+    font-family: 'Instrument Serif', serif;
+    font-size: 48px;
+    font-weight: 400;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    margin-bottom: 16px;
+  }
+  h1 em {
+    font-style: italic;
+    color: var(--accent);
+  }
+  .subhead {
+    color: var(--text-dim);
+    font-size: 15px;
+    max-width: 540px;
+  }
+  .subhead a { color: var(--accent); text-decoration: none; border-bottom: 1px dashed var(--accent); }
+
+  .progress {
+    height: 2px;
+    background: var(--border);
+    margin: 32px 0 40px;
+    border-radius: 1px;
+    overflow: hidden;
+  }
+  .progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent-warm));
+    width: 0%;
+    transition: width 0.4s ease;
+  }
+
+  form { display: flex; flex-direction: column; gap: 28px; }
+
+  .field { display: flex; flex-direction: column; gap: 10px; }
+  .field-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 0.1em;
+  }
+  label {
+    font-size: 17px;
+    font-weight: 500;
+    color: var(--text);
+  }
+  label .req { color: var(--accent-warm); margin-left: 4px; }
+  .hint { font-size: 13px; color: var(--text-dim); margin-top: -4px; }
+
+  input[type="text"], input[type="email"], textarea, select {
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 12px 14px;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 15px;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    width: 100%;
+  }
+  input:focus, textarea:focus, select:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-glow);
+  }
+  textarea { resize: vertical; min-height: 90px; font-family: inherit; }
+
+  .radio-grid, .check-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 8px;
+  }
+  .radio-grid label, .check-grid label {
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px 14px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 400;
+    text-align: center;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .radio-grid label:hover, .check-grid label:hover {
+    border-color: var(--border-bright);
+  }
+  .radio-grid input, .check-grid input { display: none; }
+  .radio-grid input:checked + span, .check-grid input:checked + span { }
+  .radio-grid label:has(input:checked), .check-grid label:has(input:checked) {
+    border-color: var(--accent);
+    background: var(--accent-glow);
+    color: var(--accent);
+  }
+
+  .rating-row {
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+    gap: 6px;
+  }
+  .rating-row label {
+    aspect-ratio: 1;
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+  }
+  .rating-row label:hover { border-color: var(--border-bright); }
+  .rating-row input { display: none; }
+  .rating-row label:has(input:checked) {
+    background: var(--accent);
+    color: var(--bg);
+    border-color: var(--accent);
+  }
+  .rating-labels {
+    display: flex;
+    justify-content: space-between;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-top: 6px;
+    letter-spacing: 0.05em;
+  }
+
+  button {
+    background: var(--accent);
+    color: var(--bg);
+    border: none;
+    border-radius: 6px;
+    padding: 14px 28px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    margin-top: 16px;
+    transition: all 0.15s;
+    align-self: flex-start;
+  }
+  button:hover:not(:disabled) {
+    background: #38bdf8;
+    transform: translateY(-1px);
+    box-shadow: 0 8px 24px var(--accent-glow);
+  }
+  button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .success-state {
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 48px 32px;
+    text-align: center;
+  }
+  .success-state .check {
+    width: 56px; height: 56px;
+    background: var(--accent-glow);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 24px;
+    color: var(--accent);
+    font-size: 28px;
+  }
+  .success-state h2 {
+    font-family: 'Instrument Serif', serif;
+    font-size: 32px;
+    font-weight: 400;
+    margin-bottom: 12px;
+  }
+  .success-state p { color: var(--text-dim); }
+
+  .error-msg {
+    background: rgba(248, 113, 113, 0.1);
+    border: 1px solid var(--danger);
+    color: var(--danger);
+    padding: 12px 14px;
+    border-radius: 6px;
+    font-size: 14px;
+    margin-top: 12px;
+    display: none;
+  }
+  .error-msg.show { display: block; }
+
+  footer {
+    margin-top: 64px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 0.05em;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  @media (max-width: 600px) {
+    body { padding: 32px 16px 64px; }
+    h1 { font-size: 36px; }
+    .rating-row { grid-template-columns: repeat(5, 1fr); }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <div class="eyebrow">Closed beta · v1</div>
+    <h1>Tell us what <em>actually</em> works.</h1>
+    <p class="subhead">You're testing <a href="https://new.lunarcrush.com" target="_blank">new.lunarcrush.com</a> before it ships. Be specific, be honest, be brutal if needed. Takes about 4 minutes.</p>
+  </header>
+
+  <div class="progress"><div class="progress-bar" id="progressBar"></div></div>
+
+  <form id="feedbackForm">
+
+    <div class="field">
+      <span class="field-num">01 / 11</span>
+      <label for="name">Your name <span class="req">*</span></label>
+      <input type="text" id="name" name="name" required />
+    </div>
+
+    <div class="field">
+      <span class="field-num">02 / 11</span>
+      <label for="email">Email <span class="req">*</span></label>
+      <input type="email" id="email" name="email" required />
+      <span class="hint">So we can follow up if something needs clarifying.</span>
+    </div>
+
+    <div class="field">
+      <span class="field-num">03 / 11</span>
+      <label>Which describes you best? <span class="req">*</span></label>
+      <div class="radio-grid">
+        <label><input type="radio" name="role" value="Power user" required /><span>Power user</span></label>
+        <label><input type="radio" name="role" value="Investor" /><span>Investor</span></label>
+        <label><input type="radio" name="role" value="Friends/Family" /><span>Friends/Family</span></label>
+        <label><input type="radio" name="role" value="Team" /><span>Team</span></label>
+        <label><input type="radio" name="role" value="Other" /><span>Other</span></label>
+      </div>
+    </div>
+
+    <div class="field">
+      <span class="field-num">04 / 11</span>
+      <label>Where did you test it? <span class="req">*</span></label>
+      <span class="hint">Pick all that apply.</span>
+      <div class="check-grid">
+        <label><input type="checkbox" name="device" value="Desktop" /><span>Desktop</span></label>
+        <label><input type="checkbox" name="device" value="Mobile" /><span>Mobile</span></label>
+        <label><input type="checkbox" name="device" value="Tablet" /><span>Tablet</span></label>
+      </div>
+    </div>
+
+    <div class="field">
+      <span class="field-num">05 / 11</span>
+      <label>Overall, how would you rate it? <span class="req">*</span></label>
+      <div class="rating-row">
+        <label><input type="radio" name="rating" value="1" required />1</label>
+        <label><input type="radio" name="rating" value="2" />2</label>
+        <label><input type="radio" name="rating" value="3" />3</label>
+        <label><input type="radio" name="rating" value="4" />4</label>
+        <label><input type="radio" name="rating" value="5" />5</label>
+        <label><input type="radio" name="rating" value="6" />6</label>
+        <label><input type="radio" name="rating" value="7" />7</label>
+        <label><input type="radio" name="rating" value="8" />8</label>
+        <label><input type="radio" name="rating" value="9" />9</label>
+        <label><input type="radio" name="rating" value="10" />10</label>
+      </div>
+      <div class="rating-labels">
+        <span>Unusable</span>
+        <span>Solid</span>
+        <span>Ship it</span>
+      </div>
+    </div>
+
+    <div class="field">
+      <span class="field-num">06 / 11</span>
+      <label for="worked">What worked well? <span class="req">*</span></label>
+      <span class="hint">Specific features, flows, or moments that felt right.</span>
+      <textarea id="worked" name="worked" required placeholder="e.g. The token detail page loaded instantly and the sentiment chart was clearer than the old version."></textarea>
+    </div>
+
+    <div class="field">
+      <span class="field-num">07 / 11</span>
+      <label for="broke">What broke, confused, or frustrated you? <span class="req">*</span></label>
+      <span class="hint">Bugs, dead ends, UI moments that made you pause. Be specific — URLs, steps to reproduce, screenshots welcome (just describe them).</span>
+      <textarea id="broke" name="broke" required placeholder="e.g. Clicking 'Topics' in the nav on mobile didn't open the menu. Safari 17, iPhone 14."></textarea>
+    </div>
+
+    <div class="field">
+      <span class="field-num">08 / 11</span>
+      <label for="missing">What's missing that you expected to find?</label>
+      <textarea id="missing" name="missing" placeholder="Features, data, sections, or anything the current site has that this one doesn't."></textarea>
+    </div>
+
+    <div class="field">
+      <span class="field-num">09 / 11</span>
+      <label for="comparison">Compared to the current LunarCrush.com — better, worse, or different? <span class="req">*</span></label>
+      <textarea id="comparison" name="comparison" required placeholder="Honest take. Where does new beat old? Where does old still win?"></textarea>
+    </div>
+
+    <div class="field">
+      <span class="field-num">10 / 11</span>
+      <label>Would you recommend this to a friend in your space? <span class="req">*</span></label>
+      <div class="radio-grid">
+        <label><input type="radio" name="recommend" value="Definitely" required /><span>Definitely</span></label>
+        <label><input type="radio" name="recommend" value="Probably" /><span>Probably</span></label>
+        <label><input type="radio" name="recommend" value="Not yet" /><span>Not yet</span></label>
+        <label><input type="radio" name="recommend" value="No" /><span>No</span></label>
+      </div>
+    </div>
+
+    <div class="field">
+      <span class="field-num">11 / 11</span>
+      <label for="nps">Anything else?</label>
+      <textarea id="nps" name="nps" placeholder="Open mic. Hot takes welcome."></textarea>
+    </div>
+
+    <div class="error-msg" id="errorMsg"></div>
+
+    <button type="submit" id="submitBtn">Submit Feedback →</button>
+  </form>
+
+  <div class="success-state" id="successState" style="display:none;">
+    <div class="check">✓</div>
+    <h2>Got it. Thank you.</h2>
+    <p>Your feedback is in the queue. We read every response.</p>
+  </div>
+
+  <footer>
+    <span>LunarCrush · Beta Feedback</span>
+    <span>Closed · Confidential</span>
+  </footer>
+</div>
+
+<script>
+  // ⚠️ PASTE YOUR APPS SCRIPT WEB APP URL HERE ⚠️
+  const SCRIPT_URL = 'PASTE_YOUR_APPS_SCRIPT_URL_HERE';
+
+  const form = document.getElementById('feedbackForm');
+  const progressBar = document.getElementById('progressBar');
+  const errorMsg = document.getElementById('errorMsg');
+  const submitBtn = document.getElementById('submitBtn');
+
+  // Progress bar based on filled required fields
+  function updateProgress() {
+    const required = form.querySelectorAll('[required]');
+    let filled = 0;
+    const seenRadios = new Set();
+    required.forEach(el => {
+      if (el.type === 'radio') {
+        if (seenRadios.has(el.name)) return;
+        seenRadios.add(el.name);
+        if (form.querySelector(`[name="${el.name}"]:checked`)) filled++;
+      } else if (el.value.trim()) {
+        filled++;
+      }
+    });
+    const totalRequired = seenRadios.size + form.querySelectorAll('[required]:not([type=radio])').length;
+    progressBar.style.width = `${(filled / totalRequired) * 100}%`;
+  }
+  form.addEventListener('input', updateProgress);
+  form.addEventListener('change', updateProgress);
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    errorMsg.classList.remove('show');
+
+    const formData = new FormData(form);
+    const data = {};
+    for (const [key, value] of formData.entries()) {
+      if (data[key]) {
+        data[key] = Array.isArray(data[key]) ? [...data[key], value].join(', ') : data[key] + ', ' + value;
+      } else {
+        data[key] = value;
+      }
+    }
+
+    if (SCRIPT_URL.includes('PASTE_YOUR')) {
+      errorMsg.textContent = 'Setup not complete: the Apps Script URL has not been added to this form yet.';
+      errorMsg.classList.add('show');
+      return;
+    }
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Submitting...';
+
+    try {
+      // Apps Script doesn't accept preflight CORS, so use no-cors mode
+      // Response is opaque but the write still happens server-side
+      await fetch(SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(data)
+      });
+
+      form.style.display = 'none';
+      document.getElementById('successState').style.display = 'block';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch (err) {
+      errorMsg.textContent = 'Something went wrong submitting your feedback. Please try again or email jon@lunarcrush.com.';
+      errorMsg.classList.add('show');
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Submit Feedback →';
+    }
+  });
+</script>
+</body>
+</html>
