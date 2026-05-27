@@ -200,7 +200,12 @@
     border-color: var(--border-bright);
     color: var(--text);
   }
-  .radio-grid input, .check-grid input { display: none; }
+  .radio-grid input, .check-grid input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+    width: 1px; height: 1px;
+  }
   .radio-grid label:has(input:checked), .check-grid label:has(input:checked) {
     border-color: rgba(124, 92, 255, 0.45);
     background: var(--pill-bg);
@@ -227,7 +232,12 @@
     transition: all 0.15s;
   }
   .rating-row label:hover { border-color: var(--border-bright); color: var(--text); }
-  .rating-row input { display: none; }
+  .rating-row input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+    width: 1px; height: 1px;
+  }
   .rating-row label:has(input:checked) {
     background: var(--accent);
     color: #fff;
@@ -268,17 +278,43 @@
   }
   button:disabled { opacity: 0.5; cursor: not-allowed; }
 
-  .success-state {
+  .success-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(6, 8, 18, 0.78);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    z-index: 100;
+    animation: overlay-in 0.25s ease-out;
+  }
+  .success-overlay.show { display: flex; }
+  @keyframes overlay-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  .success-card {
     background: var(--bg-elev);
     border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 56px 32px;
+    border-radius: 20px;
+    padding: 48px 40px;
     text-align: center;
+    max-width: 440px;
+    width: 100%;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.5), 0 0 60px var(--accent-glow);
+    animation: card-in 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   }
-  .success-state .check {
+  @keyframes card-in {
+    from { opacity: 0; transform: translateY(12px) scale(0.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .success-card .check {
     width: 64px; height: 64px;
     background: var(--pill-bg);
-    border: 1px solid rgba(124, 92, 255, 0.3);
+    border: 1px solid rgba(124, 92, 255, 0.35);
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -286,15 +322,25 @@
     margin: 0 auto 24px;
     color: var(--accent-soft);
     font-size: 28px;
-    box-shadow: 0 0 32px var(--accent-glow);
+    box-shadow: 0 0 32px var(--accent-glow-strong);
   }
-  .success-state h2 {
+  .success-card h2 {
     font-family: 'Instrument Serif', serif;
     font-size: 36px;
     font-weight: 400;
     margin-bottom: 12px;
+    line-height: 1.1;
   }
-  .success-state p { color: var(--text-dim); }
+  .success-card p {
+    color: var(--text-dim);
+    margin-bottom: 28px;
+    line-height: 1.55;
+  }
+  .success-card button {
+    margin-top: 0;
+    padding: 14px 28px;
+    font-size: 13px;
+  }
 
   .error-msg {
     background: rgba(248, 113, 113, 0.1);
@@ -456,10 +502,13 @@
     <button type="submit" id="submitBtn">Submit Feedback →</button>
   </form>
 
-  <div class="success-state" id="successState" style="display:none;">
-    <div class="check">✓</div>
-    <h2>Got it. Thank you.</h2>
-    <p>Your feedback is in the queue. We read every response.</p>
+  <div class="success-overlay" id="successOverlay" role="dialog" aria-modal="true" aria-labelledby="successHeading">
+    <div class="success-card">
+      <div class="check">✓</div>
+      <h2 id="successHeading">Got it. Thank you.</h2>
+      <p>Your feedback is in the queue. We read every response.</p>
+      <button type="button" id="submitAnotherBtn">Submit Another Response</button>
+    </div>
   </div>
 
   <footer>
@@ -520,8 +569,6 @@
     submitBtn.textContent = 'Submitting...';
 
     try {
-      // Apps Script doesn't accept preflight CORS, so use no-cors mode
-      // Response is opaque but the write still happens server-side
       await fetch(SCRIPT_URL, {
         method: 'POST',
         mode: 'no-cors',
@@ -529,15 +576,24 @@
         body: JSON.stringify(data)
       });
 
-      form.style.display = 'none';
-      document.getElementById('successState').style.display = 'block';
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      document.getElementById('successOverlay').classList.add('show');
+      document.body.style.overflow = 'hidden';
     } catch (err) {
       errorMsg.textContent = 'Something went wrong submitting your feedback. Please try again or email jon@lunarcrush.com.';
       errorMsg.classList.add('show');
       submitBtn.disabled = false;
       submitBtn.textContent = 'Submit Feedback →';
     }
+  });
+
+  document.getElementById('submitAnotherBtn').addEventListener('click', () => {
+    document.getElementById('successOverlay').classList.remove('show');
+    document.body.style.overflow = '';
+    form.reset();
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Submit Feedback →';
+    updateProgress();
+    document.querySelector('header').scrollIntoView({ behavior: 'smooth', block: 'start' });
   });
 </script>
 </body>
